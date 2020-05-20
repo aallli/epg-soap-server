@@ -32,42 +32,42 @@ from django.db.utils import IntegrityError
 from django.views.decorators.csrf import csrf_exempt
 from spyne.error import ResourceNotFoundError, ResourceAlreadyExistsError
 from spyne.server.django import DjangoApplication
-from spyne.model.primitive import Unicode, Integer
+from spyne.model.primitive import Integer
 from spyne.model.complex import Iterable
 from spyne.service import Service
 from spyne.protocol.soap import Soap11
 from spyne.application import Application
 from spyne.decorator import rpc
-from spyne.util.django import DjangoComplexModel, DjangoService
+from spyne.util.django import DjangoComplexModel
 from soapserver.models import User
 
 
-class User(DjangoComplexModel):
+class ComplexUser(DjangoComplexModel):
     class Attributes(DjangoComplexModel.Attributes):
         django_model = User
 
 
 class UserService(Service):
-    @rpc(Integer, _returns=User)
+    @rpc(Integer, _returns=ComplexUser)
     def get_user(ctx, pk):
         try:
             return User.objects.get(pk=pk)
         except User.DoesNotExist:
-            raise ResourceNotFoundError('User')
+            raise ResourceNotFoundError('ComplexUser')
 
-    @rpc(_returns=Iterable(User))
+    @rpc(_returns=Iterable(ComplexUser))
     def get_users(ctx):
         try:
             return User.objects.all()
         except User.DoesNotExist:
-            raise ResourceNotFoundError('User')
+            raise ResourceNotFoundError('ComplexUser')
 
-    @rpc(User, _returns=User)
+    @rpc(ComplexUser, _returns=ComplexUser)
     def create_user(ctx, user):
         try:
             return User.objects.create(**user.as_dict())
         except IntegrityError:
-            raise ResourceAlreadyExistsError('User')
+            raise ResourceAlreadyExistsError('ComplexUser')
 
 
 app = Application([UserService],
