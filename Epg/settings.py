@@ -54,7 +54,8 @@ ALLOWED_HOSTS = ['localhost']
 
 INSTALLED_APPS = [
     # 'corsheaders',
-    'soapserver'
+    'soapserver',
+    'spyne',
 ]
 
 MIDDLEWARE = [
