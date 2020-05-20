@@ -28,3 +28,9 @@ Installation Guide:
 5- Start project on desired port:
 
     python manage.py runserver 8000
+    
+    
+    git clone git://github.com/arskom/spyne.git
+    
+    python setup.py install
+    pip install pytest
