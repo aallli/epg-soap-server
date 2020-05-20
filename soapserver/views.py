@@ -28,10 +28,8 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
 from django.views.decorators.csrf import csrf_exempt
-
 from spyne.error import ResourceNotFoundError, ResourceAlreadyExistsError
 from spyne.server.django import DjangoApplication
 from spyne.model.primitive import Unicode, Integer
@@ -41,56 +39,41 @@ from spyne.protocol.soap import Soap11
 from spyne.application import Application
 from spyne.decorator import rpc
 from spyne.util.django import DjangoComplexModel, DjangoService
+from soapserver.models import User
 
-from soapserver.models import FieldContainer
 
-
-class Container(DjangoComplexModel):
+class User(DjangoComplexModel):
     class Attributes(DjangoComplexModel.Attributes):
-        django_model = FieldContainer
-        django_exclude = ['excluded_field']
+        django_model = User
 
 
-class HelloWorldService(Service):
-    @rpc(_returns=Iterable(Unicode))
-    def say_hello(ctx):
-        for i in range(3):
-            yield 'Hello, %s' % i
-
-
-class ContainerService(Service):
-    @rpc(Integer, _returns=Container)
-    def get_container(ctx, pk):
+class UserService(Service):
+    @rpc(Integer, _returns=User)
+    def get_user(ctx, pk):
         try:
-            return FieldContainer.objects.get(pk=pk)
-        except FieldContainer.DoesNotExist:
-            raise ResourceNotFoundError('Container')
+            return User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            raise ResourceNotFoundError('User')
 
-    @rpc(Container, _returns=Container)
-    def create_container(ctx, container):
+    @rpc(_returns=Iterable(User))
+    def get_users(ctx):
         try:
-            return FieldContainer.objects.create(**container.as_dict())
+            return User.objects.all()
+        except User.DoesNotExist:
+            raise ResourceNotFoundError('User')
+
+    @rpc(User, _returns=User)
+    def create_user(ctx, user):
+        try:
+            return User.objects.create(**user.as_dict())
         except IntegrityError:
-            raise ResourceAlreadyExistsError('Container')
-
-class ExceptionHandlingService(DjangoService):
-
-    """Service for testing exception handling."""
-
-    @rpc(_returns=Container)
-    def raise_does_not_exist(ctx):
-        return FieldContainer.objects.get(pk=-1)
-
-    @rpc(_returns=Container)
-    def raise_validation_error(ctx):
-        raise ValidationError(None, 'Invalid.')
+            raise ResourceAlreadyExistsError('User')
 
 
-app = Application([HelloWorldService, ContainerService,
-                   ExceptionHandlingService],
-    'soapserver',
-    in_protocol=Soap11(validator='lxml'),
-    out_protocol=Soap11(),
-)
+app = Application([UserService],
+                  'epg.soap.server',
+                  in_protocol=Soap11(validator='lxml'),
+                  out_protocol=Soap11(),
+                  )
 
-hello_world_service = csrf_exempt(DjangoApplication(app))
+epg_soap_service = csrf_exempt(DjangoApplication(app))
