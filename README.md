@@ -19,7 +19,7 @@ Installation Guide:
     
 2- Activate virtual environment:
 
-    source .\epg-env\scripts\activate
+    source epg-env/bin/activate
     
 3- Install requirements:
 
