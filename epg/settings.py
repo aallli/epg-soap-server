@@ -62,7 +62,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
 ]
 
-ROOT_URLCONF = 'epg1.urls'
+ROOT_URLCONF = 'epg.urls'
 
 TEMPLATES = [
     {
